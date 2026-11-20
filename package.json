@@ -1,0 +1,25 @@
+{
+  "name": "codexhost-bot",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Bot integration CLI that delegates Grok Bot tasks to codexhost devices",
+  "license": "LGPL-3.0-only",
+  "type": "module",
+  "bin": {
+    "codexhost-bot": "src/cli.mjs"
+  },
+  "files": [
+    "src",
+    "skill",
+    "systemd"
+  ],
+  "scripts": {
+    "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=22.19.0 <23 || >=24 <25"
+  },
+  "devDependencies": {
+    "vitest": "4.1.10"
+  }
+}
