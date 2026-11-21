@@ -65,6 +65,15 @@ Point `CODEXHOST_BOT_CONFIG` at a private JSON file. All paths must be absolute.
 
 Each device gets its own codexhost client, registered once with `codexhost client add <name>`.
 
+## How receipts work
+
+codexhost only records that a watched Thread stopped; it does not call the Bot. `codexhost-bot listen` follows every client's event log with `codexhost events --follow` (locally, or over SSH with a stdin watchdog so the remote follower exits when the connection drops). For each event that belongs to a task, it posts the event to the originating Bot's webhook, then saves that client's cursor in `<name>.cursor.json`. After a restart it continues from the cursor. A process killed between the post and the cursor write sends that event once more; the Skill resolves each event before delivering, so a duplicate is not sent to the chat twice. 429 and 5xx responses are retried with backoff without moving the cursor.
+
+- Only the listener writes cursor files. Task records stay owned by the commands, which serialize on `privateDir/integration.lock`.
+- A cancelled task produces no event: `thread cancel` removes its watches, and the cancel command's own reply reports it. A follow-up sent while a Turn is running returns `THREAD_BUSY`.
+- `codexhost-bot cursor seed` records the current end of each log, so moving an existing installation to the listener does not repost old events.
+- Node's `fetch` ignores proxy variables unless `NODE_USE_ENV_PROXY=1` is set.
+
 ## systemd
 
 `systemd/codexhost-bot.service` runs the resident listener as a user service:
